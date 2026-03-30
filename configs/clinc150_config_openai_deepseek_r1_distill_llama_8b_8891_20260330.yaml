@@ -1,0 +1,86 @@
+# CLINC150 Configuration for UCRID (DeepSeek-R1-Distill-Llama-8B@8891, oos_only)
+
+dataset:
+  name: "clinc150"
+  data_dir: "/mnt/data3/wzc/llm_oos_detection/dataset/clinc150"
+  num_intents: 150
+  oos_label: 150
+  max_seq_length: 64
+
+model:
+  bert_model: "/mnt/data3/wzc/IntentGPT-llama/models/bert-base-uncased"
+  hidden_size: 768
+  dropout: 0.1
+  num_labels: 151
+
+training:
+  batch_size: 64
+  num_epochs: 10
+  learning_rate: 2.0e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  fp16: false
+  seed: 42
+  num_workers: 0
+
+loss:
+  lambda_contrastive: 0.3
+  lambda_boundary: 0.1
+  temperature: 0.07
+  margin: 1.0
+
+prototype:
+  update_every_epochs: 1
+
+routing:
+  alpha: 0.5
+  alpha_grid: [0.3, 0.5, 0.7]
+  tau_accept: 0.3
+  tau_accept_grid: [0.2, 0.3, 0.4]
+  tau_reject: 0.8
+  tau_reject_grid: [0.7, 0.8, 0.9]
+  delta: 1.0
+  delta_grid: [1.0]
+  temperature: 1.0
+  calibrate_temperature: true
+  search_max_oos_f1_drop: 0.01
+  top_k_candidates: 3
+
+llm_judge:
+  model: "deepseek-r1-8b"
+  backend: "openai"
+  base_url: "http://127.0.0.1:8891/v1"
+  api_key: "not-needed"
+  few_shot_k: 3
+  oos_examples: 2
+  max_tokens: 24
+  temperature: 0.0
+  disable_thinking: true
+  local_batch_size: 4
+  shuffle_candidates: true
+  random_seed: 42
+  accept_policy: "oos_only"
+  openai_extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
+
+inference:
+  batch_size: 16
+
+evaluation:
+  metrics: ["accuracy", "f1", "precision", "recall", "oos_f1"]
+  save_predictions: true
+
+hardware:
+  num_gpus: 8
+  gpu_type: "RTX 3090"
+
+logging:
+  log_dir: "./logs"
+  checkpoint_dir: "./checkpoints"
+
+experiment:
+  name: "ucrid_clinc150_deepseek_r1_distill_llama_8b_8891"
+  version: "v1.0"
+  description: "UCRID CLINC150 with DeepSeek-R1-Distill-Llama-8B Stage-3 judge on 8891"

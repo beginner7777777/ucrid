@@ -475,7 +475,14 @@ def main(args):
                 client = anthropic.Anthropic()
             elif llm_backend == "openai":
                 import openai
-                client = openai.OpenAI()
+                openai_kwargs = {}
+                base_url = config.get("llm_judge.base_url", None)
+                api_key = config.get("llm_judge.api_key", None)
+                if base_url:
+                    openai_kwargs["base_url"] = base_url
+                if api_key:
+                    openai_kwargs["api_key"] = api_key
+                client = openai.OpenAI(**openai_kwargs)
 
             llm_judge = LLMJudge(
                 client=client,
