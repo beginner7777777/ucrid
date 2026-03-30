@@ -1,0 +1,92 @@
+{
+  "accuracy": 0.6708701134930644,
+  "id_accuracy": 0.4713896457765668,
+  "oos_precision": 0.6635859519408502,
+  "oos_recall": 0.8427230046948356,
+  "oos_f1": 0.7425025853154085,
+  "latency_p50": 73.54433834552765,
+  "latency_p95": 111.75604164600372,
+  "latency_p99": 159.0094268321991,
+  "llm_call_rate": 0.2547288776796974,
+  "routing": {
+    "total": 793,
+    "small_model": 0.15510718789407313,
+    "direct_oos": 0.5901639344262295,
+    "llm": 0.2547288776796974
+  },
+  "routing_counts": {
+    "small_model": 123,
+    "direct_oos": 468,
+    "llm": 202
+  },
+  "llm_enabled": true,
+  "stage1_metrics": {
+    "accuracy": 0.31525851197982346,
+    "id_accuracy": 0.6811989100817438,
+    "oos_precision": 0.0,
+    "oos_recall": 0.0,
+    "oos_f1": 0.0
+  },
+  "stage2_proxy_metrics": {
+    "accuracy": 0.5952080706179067,
+    "id_accuracy": 0.48501362397820164,
+    "oos_precision": 0.6282051282051282,
+    "oos_recall": 0.6901408450704225,
+    "oos_f1": 0.6577181208053692,
+    "latency_p50": 0.8187592029571533,
+    "latency_p95": 0.9994771745469835,
+    "latency_p99": 9.710758924484253,
+    "llm_call_rate": 0.2547288776796974,
+    "routing": {
+      "total": 793,
+      "small_model": 0.15510718789407313,
+      "direct_oos": 0.5901639344262295,
+      "llm": 0.2547288776796974
+    },
+    "routing_counts": {
+      "small_model": 123,
+      "direct_oos": 468,
+      "llm": 202
+    },
+    "llm_enabled": false
+  },
+  "final_stage": "stage3_llm",
+  "best_thresholds": {
+    "alpha": 0.7,
+    "tau_accept": 0.4,
+    "tau_reject": 0.7,
+    "delta": 1.0,
+    "llm_rate": 0.26262626262626265,
+    "metrics": {
+      "accuracy": 0.5404040404040404,
+      "id_accuracy": 0.4891304347826087,
+      "oos_precision": 0.5740740740740741,
+      "oos_recall": 0.5849056603773585,
+      "oos_f1": 0.5794392523364486
+    },
+    "routing": {
+      "total": 198,
+      "small_model": 0.1919191919191919,
+      "direct_oos": 0.5454545454545454,
+      "llm": 0.26262626262626265
+    },
+    "temperature": 1.4575004577636719,
+    "baseline_metrics": {
+      "accuracy": 0.3181818181818182,
+      "id_accuracy": 0.6847826086956522,
+      "oos_precision": 0.0,
+      "oos_recall": 0.0,
+      "oos_f1": 0.0
+    },
+    "constraint_satisfied": true
+  },
+  "router_config": {
+    "alpha": 0.7,
+    "tau_accept": 0.4,
+    "tau_reject": 0.7,
+    "delta": 1.0,
+    "temperature": 1.4575004577636719,
+    "top_k": 3
+  },
+  "llm_accept_policy": "oos_only"
+}
