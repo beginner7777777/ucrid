@@ -1,0 +1,96 @@
+# CLINC150 Configuration for UCRID (oos_only + warn-clean, Qwen3-8B@8888)
+
+# Dataset
+dataset:
+  name: "clinc150"
+  data_dir: "/mnt/data3/wzc/llm_oos_detection/dataset/clinc150"
+  num_intents: 150
+  oos_label: 150
+  max_seq_length: 64
+
+# Model
+model:
+  bert_model: "/mnt/data3/wzc/IntentGPT-llama/models/bert-base-uncased"
+  hidden_size: 768
+  dropout: 0.1
+  num_labels: 151  # 150 intents + 1 OOS
+
+# Training (Stage 1)
+training:
+  batch_size: 64
+  num_epochs: 10
+  learning_rate: 2.0e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  fp16: false
+  seed: 42
+  num_workers: 0
+
+# Loss weights  (L = L_CE + λ_s·L_SupCon + λ_b·L_Boundary)
+loss:
+  lambda_contrastive: 0.3   # λ_s
+  lambda_boundary: 0.1      # λ_b
+  temperature: 0.07         # τ_c
+  margin: 1.0               # Δ (Euclidean boundary margin)
+
+# Prototype (mean prototype per intent, updated every epoch)
+prototype:
+  update_every_epochs: 1
+
+# Stage 2: Dual-threshold routing
+routing:
+  alpha: 0.5                # uncertainty fusion weight (entropy vs distance)
+  alpha_grid: [0.3, 0.5, 0.7]
+  tau_accept: 0.3           # s(u) <= tau_accept -> small model direct output
+  tau_accept_grid: [0.2, 0.3, 0.4]
+  tau_reject: 1.0           # s(u) >= tau_reject AND d_min > delta -> direct OOS
+  tau_reject_grid: [1.0]
+  delta: 1.1                # distance threshold for direct OOS judgment
+  delta_grid: [1.1]
+  temperature: 1.0
+  calibrate_temperature: true
+  search_max_oos_f1_drop: 0.01
+  top_k_candidates: 3       # top-k intents passed to LLM
+
+# Stage 3: LLM judge
+llm_judge:
+  model: "Qwen/Qwen3-8B"
+  backend: "openai"         # "local" | "anthropic" | "openai"
+  few_shot_k: 3             # examples per candidate intent
+  oos_examples: 2           # OOS few-shot examples
+  max_tokens: 96
+  temperature: 0.0
+  disable_thinking: true
+  openai_extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
+  local_batch_size: 8
+  shuffle_candidates: true
+  random_seed: 42
+  accept_policy: "oos_only" # "all" | "oos_only" | "id_only"
+
+# Inference
+inference:
+  batch_size: 16
+
+# Evaluation
+evaluation:
+  metrics: ["accuracy", "f1", "precision", "recall", "oos_f1"]
+  save_predictions: false
+
+# Hardware
+hardware:
+  num_gpus: 8
+  gpu_type: "RTX 3090"
+
+# Logging
+logging:
+  log_dir: "./logs"
+  checkpoint_dir: "./checkpoints"
+
+# Experiment
+experiment:
+  name: "ucrid_clinc150"
+  version: "v1.0"
+  description: "UCRID: Uncertainty-aware Cascade Routing for Intent Detection and OOS Detection"

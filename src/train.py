@@ -195,12 +195,24 @@ def main(args):
     best_val_oos_f1 = 0.0
     best_ckpt_path = os.path.join(output_dir, 'best_model.pt')
 
-    # Phased training schedule:
-    #   Phase 1 (epochs 1-3) : CE only          — let BERT learn basic ID classification
-    #   Phase 2 (epochs 4-6) : CE + SupCon      — refine embedding space
-    #   Phase 3 (epochs 7+)  : CE + SupCon + Boundary — add OOS boundary
-    CE_ONLY_EPOCHS    = 3
-    BOUNDARY_START    = 7
+    # Phased training schedule (configurable):
+    #   Phase 1 (epochs <= CE_ONLY_EPOCHS)        : CE only
+    #   Phase 2 (CE_ONLY_EPOCHS < epoch < BOUNDARY_START) : CE + SupCon
+    #   Phase 3 (epochs >= BOUNDARY_START)        : CE + SupCon + Boundary
+    # Default keeps previous behavior (3/7).
+    CE_ONLY_EPOCHS = int(config.get('training.ce_only_epochs', 3))
+    BOUNDARY_START = int(config.get('training.boundary_start_epoch', 7))
+    if BOUNDARY_START < 1:
+        raise ValueError(f"training.boundary_start_epoch must be >= 1, got {BOUNDARY_START}")
+    if CE_ONLY_EPOCHS < 0:
+        raise ValueError(f"training.ce_only_epochs must be >= 0, got {CE_ONLY_EPOCHS}")
+    if BOUNDARY_START <= CE_ONLY_EPOCHS:
+        # This would skip the CE+SupCon middle phase entirely. We allow this,
+        # but keep behavior explicit in logs.
+        print(
+            f"Warning: boundary_start_epoch ({BOUNDARY_START}) <= ce_only_epochs ({CE_ONLY_EPOCHS}); "
+            "the CE+SupCon phase will be skipped."
+        )
 
     for epoch in range(1, config.get('training.num_epochs') + 1):
         print(f"\nEpoch {epoch}/{config.get('training.num_epochs')}")
@@ -275,7 +287,7 @@ def main(args):
         )
 
     # Final test evaluation
-    checkpoint = torch.load(best_ckpt_path)
+    checkpoint = torch.load(best_ckpt_path, weights_only=False)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 

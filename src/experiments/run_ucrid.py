@@ -421,7 +421,7 @@ def main(args):
     ckpt_path = next((path for path in default_ckpt_candidates if path and os.path.exists(path)), None)
     if ckpt_path is None:
         raise FileNotFoundError("No checkpoint found. Pass --checkpoint explicitly.")
-    ckpt = torch.load(ckpt_path, map_location=device)
+    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
     model.load_state_dict(ckpt["model_state_dict"])
     print(f"Loaded checkpoint: {ckpt_path}")
 
