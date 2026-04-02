@@ -447,11 +447,6 @@ def main(args):
     )
 
     # Calibrate and search thresholds on val set
-    fit_temperature = config.get("routing.calibrate_temperature", True)
-    if args.disable_temperature:
-        fit_temperature = False
-        print("Temperature calibration disabled by CLI flag (--disable_temperature).")
-
     best_thresholds = search_thresholds(
         router=router,
         model=model,
@@ -464,7 +459,7 @@ def main(args):
         tau_reject_grid=tuple(config.get("routing.tau_reject_grid", [0.7, 0.8, 0.9])),
         delta_grid=tuple(config.get("routing.delta_grid", [config.get("routing.delta", 1.0)])),
         max_oos_f1_drop=config.get("routing.search_max_oos_f1_drop", 0.01),
-        fit_temperature=fit_temperature,
+        fit_temperature=config.get("routing.calibrate_temperature", True),
     )
 
     # Stage 3: LLM judge (optional)
@@ -575,7 +570,6 @@ def main(args):
             "top_k": router.top_k,
         },
         "llm_accept_policy": llm_accept_policy,
-        "temperature_calibration_enabled": bool(fit_temperature),
     }
     save_results(results, os.path.join(output_dir, "ucrid_results.json"))
     if config.get("evaluation.save_predictions", True):
@@ -593,10 +587,5 @@ if __name__ == "__main__":
     parser.add_argument("--exp_name", default="run1")
     parser.add_argument("--gpu_id", type=int, default=0)
     parser.add_argument("--use_llm", action="store_true", help="Enable Stage 3 LLM judge")
-    parser.add_argument(
-        "--disable_temperature",
-        action="store_true",
-        help="Disable validation-time temperature scaling even if config enables it.",
-    )
     args = parser.parse_args()
     main(args)

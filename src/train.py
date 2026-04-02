@@ -231,7 +231,11 @@ def main(args):
             criterion.lambda_contrastive = lambda_contrastive
             criterion.lambda_boundary    = lambda_boundary
             prototype_bank = build_mean_prototypes(
-                model, train_loader, device, num_intents, oos_label
+                model,
+                train_loader,
+                device,
+                num_intents,
+                oos_label,
             )
             phase = "CE+SupCon+Boundary"
 
